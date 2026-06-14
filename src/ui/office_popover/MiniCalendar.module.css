@@ -1,0 +1,98 @@
+/* 甘雨风格迷你日历 —— 冰雪冷色调玻璃卡片 */
+.cal {
+    --cal-ice: #8ec5ff;
+    --cal-violet: #b3a7e8;
+    --cal-accent: #7eb6f0;
+    position: absolute;
+    top: calc(100% + 6px);
+    /* 锚在截止按钮上,向右偏移一点,给面板左侧留出间距,不再贴左缘 */
+    right: -10px;
+    z-index: 40;
+    width: 232px;
+    padding: 12px;
+    border-radius: 16px;
+    background: linear-gradient(165deg, rgba(38, 48, 72, 0.98), rgba(28, 34, 54, 0.98));
+    border: 1px solid rgba(170, 200, 245, 0.18);
+    box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(220, 235, 255, 0.16);
+    color: rgba(238, 244, 255, 0.95);
+    -webkit-font-smoothing: antialiased;
+    cursor: default;
+    animation: calIn 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+    user-select: none;
+}
+/* open upward when there isn't room below */
+.openUp { top: auto; bottom: calc(100% + 6px); transform-origin: bottom right; }
+@keyframes calIn {
+    from { opacity: 0; transform: scale(0.95) translateY(-4px); }
+    to { opacity: 1; transform: none; }
+}
+
+@media (prefers-color-scheme: light) {
+    .cal {
+        background: linear-gradient(165deg, rgba(250, 252, 255, 0.99), rgba(238, 244, 252, 0.99));
+        border-color: rgba(120, 160, 220, 0.22);
+        color: rgba(34, 46, 72, 0.94);
+        box-shadow: 0 16px 40px -12px rgba(80, 110, 160, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+}
+
+.header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.monthLabel { font-size: 13.5px; font-weight: 600; letter-spacing: 0.3px; font-variant-numeric: tabular-nums; }
+.nav {
+    width: 26px; height: 26px; border-radius: 8px; border: none; cursor: pointer;
+    display: grid; place-items: center;
+    background: rgba(150, 185, 235, 0.1); color: inherit; opacity: 0.7;
+    transition: background 0.2s, opacity 0.2s, transform 0.2s;
+}
+.nav:hover { background: rgba(150, 185, 235, 0.2); opacity: 1; transform: scale(1.08); }
+
+.weekRow { display: grid; grid-template-columns: repeat(7, 1fr); margin-bottom: 4px; }
+.weekday { text-align: center; font-size: 10.5px; font-weight: 600; color: rgba(206, 220, 245, 0.5); padding: 2px 0; }
+.weekend { color: rgba(179, 167, 232, 0.7); }
+@media (prefers-color-scheme: light) {
+    .weekday { color: rgba(56, 72, 104, 0.5); }
+    .weekend { color: rgba(127, 110, 200, 0.8); }
+}
+
+.grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.empty { aspect-ratio: 1; }
+.day {
+    aspect-ratio: 1; border: none; cursor: pointer; border-radius: 9px;
+    background: transparent; color: inherit;
+    font-size: 12.5px; font-variant-numeric: tabular-nums;
+    display: grid; place-items: center; position: relative;
+    transition: background 0.18s, color 0.18s, transform 0.18s;
+}
+.day:hover { background: rgba(142, 197, 255, 0.16); transform: scale(1.06); }
+.today { font-weight: 700; color: var(--cal-ice); }
+.today::after {
+    content: ""; position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%);
+    width: 4px; height: 4px; border-radius: 50%; background: var(--cal-ice);
+}
+.selected, .selected:hover {
+    background: linear-gradient(140deg, var(--cal-ice), var(--cal-violet));
+    color: #fff; font-weight: 600;
+    box-shadow: 0 4px 12px -3px rgba(126, 182, 240, 0.6);
+}
+.selected.today { color: #fff; }
+.selected.today::after { background: #fff; }
+.past { opacity: 0.28; cursor: not-allowed; }
+.past:hover { background: transparent; transform: none; }
+
+.quick {
+    display: flex; gap: 6px; margin-top: 10px; padding-top: 10px;
+    border-top: 1px solid rgba(170, 200, 245, 0.12);
+}
+.quickBtn {
+    flex: 1; height: 26px; border-radius: 8px; border: none; cursor: pointer;
+    font-size: 11.5px; font-weight: 600; letter-spacing: 0.2px;
+    background: rgba(150, 185, 235, 0.1); color: rgba(206, 220, 245, 0.85);
+    transition: background 0.2s, color 0.2s, transform 0.2s;
+}
+.quickBtn:hover { background: rgba(142, 197, 255, 0.22); color: #fff; transform: translateY(-1px); }
+.clearBtn { color: rgba(255, 154, 138, 0.9); background: rgba(255, 138, 122, 0.12); flex: 0 0 auto; padding: 0 12px; }
+.clearBtn:hover { background: rgba(255, 138, 122, 0.22); color: #ffb3a6; }
+@media (prefers-color-scheme: light) {
+    .quickBtn { color: rgba(56, 72, 104, 0.8); }
+    .quickBtn:hover { color: #fff; }
+}

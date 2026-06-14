@@ -1,0 +1,16 @@
+{
+    "focus": {
+        "workDuration": 1500,
+        "shortBreakDuration": 300,
+        "longBreakDuration": 900,
+        "longBreakInterval": 4,
+        "enablePetBinding": true,
+        "enableNotification": true
+    },
+    "stats": {
+        "date": "",
+        "todayPomodoros": 0,
+        "todayFocusSeconds": 0
+    },
+    "todos": []
+}

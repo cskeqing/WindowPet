@@ -1,0 +1,224 @@
+{
+    "My Pets": "My Pets | {{totalPets}}",
+    "My Pet": "My Pet",
+    "Meet your furry friend, a loyal companion who loves to play and cuddle": "Meet your furry friend, a loyal companion who loves to play and cuddle",
+    "Pet Shop Total": "Pet Shop | {{totalPets}}",
+    "Pet Shop": "Pet Shop",
+    "Settings": "Settings",
+    "About": "About",
+    "Setting Preferences": "Setting preferences",
+    "Apply": "Apply",
+    "Cancel": "Cancel",
+    "Language": "Language",
+    "Seem like the content of this page doesn't exist or has not been updated": "Seem like the content of this page doesn't exist or has not been updated",
+    "Choose what u desire, do what u love": "Choose what u desire, do what u love",
+    "Auto start-up": "Auto start-up",
+    "Automatically open WindowPet every time u start the computer": "Automatically open WindowPet every time u start the computer",
+    "Make the pet float above taskbar (For Window User)": "Make the pet float above taskbar (For Window User)",
+    "Pet above taskbar": "Pet above taskbar",
+    "Pet interactions": "Pet interactions",
+    "If allow pet interaction turn on, user will be able to drag and move the pet around their window": "If allow pet interaction turn on, user will be able to drag and move the pet around their window",
+    "Acquire": "Acquire",
+    "Remove": "Remove",
+    "pet name has been added to your realm": "{{name}} has been added to your realm",
+    "pet name has been removed": "{{name}} has been removed",
+    "Pet Added": "Pet Added",
+    "Pet Removed": "Pet Removed",
+    "Open": "Open",
+    "The location path of where the app store your config such as settings, pets, etc": "The location path of where the app store your config such as settings, pets, etc",
+    "App Config Path": "App Config Path",
+    "Browse wide selection of adorable pets, find your perfect companion today!": "Browse wide selection of adorable pets, find your perfect companion today!",
+    "Nya~ Oh, dear friend! In this whimsical realm of mine, where magic and wonder intertwine, alas, there are no delightful pets to be found. But fret not! Fear not! For you hold the power to change this tale. Simply venture into the enchanting settings and add a touch of furry companionship to make our world even more adorable and divine! Onegai~": "Nya~ Oh, dear friend! In this whimsical realm of mine, where magic and wonder intertwine, alas, there are no delightful pets to be found. But fret not! Fear not! For you hold the power to change this tale. Simply venture into the enchanting settings and add a touch of furry companionship to make our world even more adorable and divine! Onegai~",
+    "Version": "Version {{version}}",
+    "(release note)": "(release note)",
+    "You have the latest version": "You have the latest version {{lastCheck}}",
+    "There is a new version available": "There is a new version available {{lastCheck}}",
+    "Check for updates": "Check for updates",
+    "Developed by:": "Developed by: ",
+    "Source code:": "Source code:",
+    "Know more about WindowPet": "Know more about WindowPet",
+    "Buy me a coffee:": "Buy me a coffee:",
+    "Checking for updates": "Checking for updates",
+    "WindowPet v available, do you want to install the update?": "WindowPet v{{version}} available, do you want to install the update?",
+    "Update available": "Update available",
+    "Yes": "Yes",
+    "No": "No",
+    "Override pet scale": "Override pet scale",
+    "Allow the program to adjust all pet sizes by a fixed amount determined by your preferences, ignoring any individual pet scales": "Allow the program to adjust all pet sizes by a fixed amount determined by your preferences, ignoring any individual pet scales",
+    "Report a bug:": "Report a bug:",
+    "Community: ": "Community:",
+    "Add Custom Pet": "Add Custom Pet",
+    "State name": "State name",
+    "Start": "Start",
+    "End": "End",
+    "Enter number": "Enter number",
+    "Pet information": "Pet information",
+    "Pet name": "Pet name",
+    "Frame size": "Frame size",
+    "Spritesheet path": "Spritesheet path",
+    "Browse file": "Browse file",
+    "Pet cannot be added, try to verify your pet information again such as image path, frame size, all state name, start and end frame": "Pet cannot be added, try to verify your pet information again such as image path, frame size, all state name, start and end frame",
+    "Error: Pet cannot be added": "Error: Pet cannot be added",
+    "pet name has been removed from your realm": "{{name}} has been removed from your realm",
+    "Custom Pet Added": "Custom Pet Added",
+    "pet name has been added to your custom pet list, restart WindowPet and check pet shop to spawn your custom pet": "{{name}} has been added to your custom pet list, restart WindowPet and check pet shop to spawn your custom pet",
+    "Error Adding Custom Pet": "Error Adding Custom Pet",
+    "Pet states": "Pet states",
+    "Add more state": "Add more state",
+    "Remove state": "Remove state",
+    "Add your custom pet to your computer and watch them bring kawaii cuteness to your digital world!": "Add your custom pet to your computer and watch them bring kawaii cuteness to your digital world!",
+    "Pet name is required": "Pet name is required",
+    "Spritesheet path is required": "Spritesheet path is required",
+    "Frame size is required": "Frame size is required",
+    "Pet state name is required": "Pet state name is required",
+    "Pet state start is required": "Pet state start is required",
+    "Pet state end is required": "Pet state end is required",
+    "Pet start must be greater than 0": "Pet start must be greater than 0",
+    "Pet end must be greater than 0": "Pet end must be greater than 0",
+    "Pet start must be less than end": "Pet start must be less than end",
+    "Pet end must be greater than start": "Pet end must be greater than start",
+    "Spritesheet path provided does not exist": "Spritesheet path provided does not exist",
+    "Allow pet climb": "Allow pet climb",
+    "If allow pet climb turn on, pet will be able to climb on the left, right, and top of the window": "If allow pet climb turn on, pet will be able to climb on the left, right, and top of the window",
+    "Search for pets": "Search for pets",
+    "Office": "Office",
+    "Office Companion": "Office Companion",
+    "Focus timer, pet companion, and todo list": "Focus timer, pet companion, and todo list",
+    "Ready": "Ready",
+    "Focusing": "Focusing",
+    "Short Break": "Short Break",
+    "Long Break": "Long Break",
+    "Start Focus": "Start Focus",
+    "Pause": "Pause",
+    "Resume": "Resume",
+    "Reset": "Reset",
+    "Pomodoros": "Pomodoros",
+    "Focused": "Focused",
+    "Tasks": "Tasks",
+    "Add a task...": "Add a task...",
+    "Current task": "Current task",
+    "Set as current": "Set as current",
+    "Clear completed": "Clear completed",
+    "Timer Settings": "Timer Settings",
+    "Work (min)": "Work (min)",
+    "Short break (min)": "Short break (min)",
+    "Long break (min)": "Long break (min)",
+    "Long break after (pomodoros)": "Long break after (pomodoros)",
+    "Pet state binding": "Pet state binding",
+    "Pets change behavior based on focus phase": "Pets change behavior based on focus phase",
+    "Notifications": "Notifications",
+    "Show notification when phase changes": "Show notification when phase changes",
+    "Focus Complete": "Focus Complete",
+    "Time to take a break!": "Time to take a break!",
+    "Break Over": "Break Over",
+    "Let's get back to focus!": "Let's get back to focus!",
+    "Add your first task and start focusing with your pet!": "Add your first task and start focusing with your pet!",
+    "Delete task?": "Delete task?",
+    "Delete": "Delete",
+    "ganyu": {
+        "greet": {
+            "dawn": {
+                "1": "It's late. I'll stay and finish this last scroll with you.",
+                "2": "Still busy this late? Please remember to care for yourself.",
+                "3": "Even the stars have rested. Don't push yourself too hard."
+            },
+            "morning": {
+                "1": "Good morning. The dew lingers, let's begin slowly.",
+                "2": "Morning. Take a deep breath first, then set off.",
+                "3": "You're here. I'll be in your care again today."
+            },
+            "noon": {
+                "1": "The sun's at its peak. Have a meal and catch your breath.",
+                "2": "It's midday. Gather some strength before going on.",
+                "3": "At this hour, let me help you ease your shoulders."
+            },
+            "afternoon": {
+                "1": "Good afternoon. I've brewed you a cup of qingxin tea.",
+                "2": "Afternoons tire us. I'll help you wake gently.",
+                "3": "The light slants in. Let's walk on steadily."
+            },
+            "evening": {
+                "1": "Night has fallen. You've worked hard today.",
+                "2": "Good evening. Let's slow your pace a little.",
+                "3": "The lamps are lit. It's time to let yourself rest."
+            }
+        },
+        "phase": {
+            "working": {
+                "1": "Focusing",
+                "2": "I'm focusing alongside you"
+            },
+            "shortBreak": {
+                "1": "A short rest",
+                "2": "Rest a little while first"
+            },
+            "longBreak": {
+                "1": "Rest well",
+                "2": "This time, rest a bit longer"
+            },
+            "idle": {
+                "1": "Ready to begin",
+                "2": "We can set off anytime"
+            }
+        },
+        "event": {
+            "celebrate": {
+                "1": "Another one wrapped up neatly. You did wonderfully.",
+                "2": "I felt at ease leaving this to you.",
+                "3": "Steady progress. I'm glad for you.",
+                "4": "Done as promised. Well done."
+            },
+            "empty": {
+                "1": "No tasks yet. Tell me what you'd like, I'll keep it for you.",
+                "2": "Leave what's to be done with me, just rest at ease."
+            },
+            "focusStart": {
+                "1": "Settle in. I'll grow calm with you.",
+                "2": "From this moment, just the one thing before you."
+            },
+            "break": {
+                "1": "That stretch was hard work. Take a breath first.",
+                "2": "Stand and walk a bit. I'll wait here for you."
+            },
+            "longWork": {
+                "1": "You've been busy a long while. Have a sip of hot tea.",
+                "2": "I often forget to rest too, so I'd rather you rest.",
+                "3": "Long at the desk. It's time to let yourself slow down."
+            }
+        },
+        "subtitle": {
+            "idlePending": {
+                "1": "Let's start with the one on your mind the most.",
+                "2": "Pick one, and we'll finish it together."
+            },
+            "default": {
+                "1": "I'm here, tending today's tasks with you.",
+                "2": "Take it slow, we'll sort them one by one."
+            }
+        },
+        "onboard": {
+            "greet": {
+                "1": "Nice to meet you. I'm Ganyu, in your care from now on."
+            },
+            "hint": {
+                "1": "Choose a familiar desk, and I'll remember your preference.",
+                "2": "You can switch anytime from up top later."
+            }
+        },
+        "btn": {
+            "start": "Let's begin",
+            "pause": "Pause a moment",
+            "reset": "Start over",
+            "setCurrent": "Let's do this one first",
+            "delete": "Set this one aside",
+            "setDefault": "Remember this desk"
+        },
+        "placeholder": {
+            "addTodo": "Write down one thing you'd like to do…"
+        },
+        "footer": {
+            "pomodoros": "Focused today",
+            "minutes": "minutes"
+        }
+    }
+}
