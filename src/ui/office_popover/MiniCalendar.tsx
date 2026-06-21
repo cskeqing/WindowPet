@@ -1,13 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { localDateStr } from "../../utils/date";
 import styles from "./MiniCalendar.module.css";
-
-/** 本地 YYYY-MM-DD,避免时区偏移。 */
-function ymd(d: Date): string {
-    const m = `${d.getMonth() + 1}`.padStart(2, "0");
-    const day = `${d.getDate()}`.padStart(2, "0");
-    return `${d.getFullYear()}-${m}-${day}`;
-}
 
 const ChevronLeft = () => (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>);
 const ChevronRight = () => (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>);
@@ -65,7 +59,7 @@ export default function MiniCalendar({
 
     const year = viewDate.getFullYear();
     const month = viewDate.getMonth();
-    const monthLabel = `${year}年${month + 1}月`;
+    const monthLabel = t("office.cal.monthLabel", { year, month: month + 1 });
 
     // 构造 6 行 × 7 列的日期网格(周一为首列)
     const cells = useMemo(() => {
@@ -80,14 +74,14 @@ export default function MiniCalendar({
         return arr;
     }, [year, month]);
 
-    const weekdays = [t("一"), t("二"), t("三"), t("四"), t("五"), t("六"), t("日")];
+    const weekdays = [t("office.cal.mon"), t("office.cal.tue"), t("office.cal.wed"), t("office.cal.thu"), t("office.cal.fri"), t("office.cal.sat"), t("office.cal.sun")];
 
-    const pick = (d: Date) => { onSelect(ymd(d)); onClose(); };
+    const pick = (d: Date) => { onSelect(localDateStr(d)); onClose(); };
 
     const quickPick = (offsetDays: number) => {
         const d = new Date(today);
         d.setDate(d.getDate() + offsetDays);
-        onSelect(ymd(d));
+        onSelect(localDateStr(d));
         onClose();
     };
 
@@ -97,7 +91,7 @@ export default function MiniCalendar({
         const idx = (d.getDay() + 6) % 7;
         const add = (5 - idx + 7) % 7;
         d.setDate(d.getDate() + (add === 0 && idx !== 5 ? 7 : add));
-        onSelect(ymd(d));
+        onSelect(localDateStr(d));
         onClose();
     };
 
@@ -135,12 +129,12 @@ export default function MiniCalendar({
             </div>
 
             <div className={styles.quick}>
-                <button className={styles.quickBtn} onClick={() => quickPick(0)}>{t("今天")}</button>
-                <button className={styles.quickBtn} onClick={() => quickPick(1)}>{t("明天")}</button>
-                <button className={styles.quickBtn} onClick={pickWeekend}>{t("周末")}</button>
+                <button className={styles.quickBtn} onClick={() => quickPick(0)}>{t("office.cal.today")}</button>
+                <button className={styles.quickBtn} onClick={() => quickPick(1)}>{t("office.cal.tomorrow")}</button>
+                <button className={styles.quickBtn} onClick={pickWeekend}>{t("office.cal.weekend")}</button>
                 {value && (
                     <button className={`${styles.quickBtn} ${styles.clearBtn}`} onClick={() => { onSelect(undefined); onClose(); }}>
-                        {t("清除")}
+                        {t("office.cal.clear")}
                     </button>
                 )}
             </div>

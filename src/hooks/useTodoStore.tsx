@@ -8,12 +8,15 @@ let saveTimer: ReturnType<typeof setTimeout> | null = null;
 
 interface TodoState {
     todos: TodoItem[];
+    lastDeleted: { item: TodoItem; index: number } | null;
     loadTodos: () => Promise<void>;
     saveTodos: () => void;
     addTodo: (text: string) => void;
     toggleTodo: (id: string) => void;
     editTodo: (id: string, text: string) => void;
     removeTodo: (id: string) => void;
+    undoDelete: () => void;
+    dismissUndo: () => void;
     setCurrent: (id: string) => void;
     clearCompleted: () => void;
     reorderTodos: (fromId: string, toId: string) => void;
@@ -22,6 +25,7 @@ interface TodoState {
 
 export const useTodoStore = create<TodoState>()((set, get) => ({
     todos: [],
+    lastDeleted: null,
 
     loadTodos: async () => {
         try {
@@ -65,9 +69,25 @@ export const useTodoStore = create<TodoState>()((set, get) => ({
     },
 
     removeTodo: (id) => {
-        set(s => ({ todos: s.todos.filter(t => t.id !== id) }));
+        const { todos } = get();
+        const index = todos.findIndex(t => t.id === id);
+        if (index === -1) return;
+        const item = todos[index];
+        set({ todos: todos.filter(t => t.id !== id), lastDeleted: { item, index } });
         setTimeout(() => get().saveTodos(), 0);
     },
+
+    undoDelete: () => {
+        const { lastDeleted, todos } = get();
+        if (!lastDeleted) return;
+        const pos = Math.min(lastDeleted.index, todos.length);
+        const next = [...todos];
+        next.splice(pos, 0, lastDeleted.item);
+        set({ todos: next, lastDeleted: null });
+        setTimeout(() => get().saveTodos(), 0);
+    },
+
+    dismissUndo: () => { set({ lastDeleted: null }); },
 
     setCurrent: (id) => {
         set(s => ({

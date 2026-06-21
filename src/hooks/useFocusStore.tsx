@@ -3,7 +3,8 @@ import { FocusPhase, FocusConfig, FocusStats } from "../types/IOffice";
 import { getAppSettings, setConfig } from "../utils/settings";
 import { emitUpdatePetsEvent } from "../utils/event";
 import { DispatchType } from "../types/IEvents";
-import { showNotification } from "../utils/notification";
+import { focusNotify } from "../utils/focusNotify";
+import { localDateStr } from "../utils/date";
 import i18next from "i18next";
 
 const DEFAULT_CONFIG: FocusConfig = {
@@ -14,10 +15,6 @@ const DEFAULT_CONFIG: FocusConfig = {
     enablePetBinding: true,
     enableNotification: true,
 };
-
-function todayStr(): string {
-    return new Date().toISOString().slice(0, 10);
-}
 
 interface FocusState {
     config: FocusConfig;
@@ -50,16 +47,16 @@ export const useFocusStore = create<FocusState>()((set, get) => ({
     isPaused: false,
     endTime: null,
     intervalId: null,
-    stats: { date: todayStr(), todayPomodoros: 0, todayFocusSeconds: 0 },
+    stats: { date: localDateStr(), todayPomodoros: 0, todayFocusSeconds: 0 },
 
     loadConfig: async () => {
         try {
             const data = await getAppSettings({ configName: "office.json" });
             if (data) {
                 const config = { ...DEFAULT_CONFIG, ...data.focus };
-                let stats: FocusStats = data.stats || { date: todayStr(), todayPomodoros: 0, todayFocusSeconds: 0 };
-                if (stats.date !== todayStr()) {
-                    stats = { date: todayStr(), todayPomodoros: 0, todayFocusSeconds: 0 };
+                let stats: FocusStats = data.stats || { date: localDateStr(), todayPomodoros: 0, todayFocusSeconds: 0 };
+                if (stats.date !== localDateStr()) {
+                    stats = { date: localDateStr(), todayPomodoros: 0, todayFocusSeconds: 0 };
                 }
                 set({ config, stats, remaining: config.workDuration });
 
@@ -140,7 +137,9 @@ export const useFocusStore = create<FocusState>()((set, get) => ({
         const { intervalId, config } = get();
         if (intervalId) clearInterval(intervalId);
         set({ phase: 'idle', remaining: config.workDuration, endTime: null, intervalId: null, isPaused: false, completedPomodoros: 0 });
-        emitUpdatePetsEvent({ dispatchType: DispatchType.FocusPhaseChange, newValue: 'idle' });
+        if (config.enablePetBinding) {
+            emitUpdatePetsEvent({ dispatchType: DispatchType.FocusPhaseChange, newValue: 'idle' });
+        }
         get().saveRunState();
     },
 
@@ -200,7 +199,7 @@ export const useFocusStore = create<FocusState>()((set, get) => ({
             set({ phase: nextPhase, remaining: breakDuration, endTime: newEndTime, intervalId: id, completedPomodoros: newCompleted });
 
             if (config.enableNotification) {
-                showNotification({ title: i18next.t("Focus Complete"), message: i18next.t("Time to take a break!") });
+                focusNotify(i18next.t("Focus Complete"), i18next.t("Time to take a break!"));
             }
             if (config.enablePetBinding) {
                 emitUpdatePetsEvent({ dispatchType: DispatchType.FocusPhaseChange, newValue: nextPhase });
@@ -214,7 +213,7 @@ export const useFocusStore = create<FocusState>()((set, get) => ({
             set({ phase: 'working', remaining: config.workDuration, endTime: newEndTime, intervalId: id });
 
             if (config.enableNotification) {
-                showNotification({ title: i18next.t("Break Over"), message: i18next.t("Let's get back to focus!") });
+                focusNotify(i18next.t("Break Over"), i18next.t("Let's get back to focus!"));
             }
             if (config.enablePetBinding) {
                 emitUpdatePetsEvent({ dispatchType: DispatchType.FocusPhaseChange, newValue: 'working' });
@@ -238,8 +237,8 @@ export const useFocusStore = create<FocusState>()((set, get) => ({
     recordPomodoro: () => {
         const { stats, config } = get();
         let current = { ...stats };
-        if (current.date !== todayStr()) {
-            current = { date: todayStr(), todayPomodoros: 0, todayFocusSeconds: 0 };
+        if (current.date !== localDateStr()) {
+            current = { date: localDateStr(), todayPomodoros: 0, todayFocusSeconds: 0 };
         }
         current.todayPomodoros += 1;
         current.todayFocusSeconds += config.workDuration;

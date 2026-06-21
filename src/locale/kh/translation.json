@@ -115,6 +115,50 @@
     "Add your first task and start focusing with your pet!": "Add your first task and start focusing with your pet!",
     "Delete task?": "Delete task?",
     "Delete": "Delete",
+    "office": {
+        "paused": "ផ្អាក",
+        "tab": {
+            "todo": "កិច្ចការ",
+            "focus": "ផ្ដោតអារម្មណ៍"
+        },
+        "onboard": {
+            "subtitle": "ជ្រើសរើសតុធ្វើការ ខ្ញុំនឹងចងចាំចំណូលចិត្តអ្នក",
+            "todoDesc": "កត់ត្រាកិច្ចការ បញ្ចប់ម្តងមួយៗ",
+            "focusDesc": "កម្មវិធីកំណត់ម៉ោង ផ្ដោតអារម្មណ៍ជ្រៅ"
+        },
+        "isDefaultView": "ជាទិដ្ឋភាពលំនាំដើមរួចហើយ",
+        "unpin": "ដោះការខ្ទាស់",
+        "pin": "ខ្ទាស់បន្ទះ",
+        "skipToNext": "រំលងទៅបន្ទាប់",
+        "inProgress": "កំពុងដំណើរការ",
+        "dragToReorder": "អូសដើម្បីរៀបចំឡើងវិញ",
+        "setDueDate": "កំណត់ថ្ងៃផុតកំណត់",
+        "currentTask": "កិច្ចការបច្ចុប្បន្ន",
+        "moreItems": "ទៀត {{count}}",
+        "deleted": "បានលុប",
+        "undo": "មិនធ្វើវិញ",
+        "due": {
+            "overdue": "ផុត {{days}} ថ្ងៃ",
+            "today": "ថ្ងៃនេះ",
+            "tomorrow": "ថ្ងៃស្អែក",
+            "daysLater": "{{days}} ថ្ងៃទៀត",
+            "date": "{{day}}/{{month}}"
+        },
+        "cal": {
+            "mon": "ច.",
+            "tue": "អ.",
+            "wed": "ពុ",
+            "thu": "ព្រ",
+            "fri": "សុ",
+            "sat": "ស.",
+            "sun": "អា",
+            "monthLabel": "{{month}}/{{year}}",
+            "today": "ថ្ងៃនេះ",
+            "tomorrow": "ថ្ងៃស្អែក",
+            "weekend": "ចុងសប្តាហ៍",
+            "clear": "សម្អាត"
+        }
+    },
     "ganyu": {
         "greet": {
             "dawn": {
@@ -219,6 +263,9 @@
         "footer": {
             "pomodoros": "ផ្ដោតថ្ងៃនេះ",
             "minutes": "នាទី"
+        },
+        "ai": {
+            "keyStorageWarning": "សោ API របស់អ្នកត្រូវបានរក្សាទុកជាអក្សរធម្មតានៅក្នុងឯកសារ settings.json។ កុំប្រើសោដែលមានសិទ្ធិច្រើនពេក។"
         }
     }
 }

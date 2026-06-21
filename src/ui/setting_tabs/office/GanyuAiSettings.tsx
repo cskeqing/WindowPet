@@ -160,6 +160,12 @@ function GanyuAiSettings() {
                         size="xs" radius="md"
                     />
 
+                    {(aiEnabled || maskedApiKey()) && (
+                        <Alert color="yellow" variant="light" icon={<IconAlertCircle size={16} />} p="xs">
+                            <Text size="xs">{t("ganyu.ai.keyStorageWarning")}</Text>
+                        </Alert>
+                    )}
+
                     <TextInput
                         label={t("Model (optional)")}
                         placeholder="gpt-4o-mini"
