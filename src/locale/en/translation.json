@@ -115,6 +115,50 @@
     "Add your first task and start focusing with your pet!": "Add your first task and start focusing with your pet!",
     "Delete task?": "Delete task?",
     "Delete": "Delete",
+    "office": {
+        "paused": "Paused",
+        "tab": {
+            "todo": "To-do",
+            "focus": "Focus"
+        },
+        "onboard": {
+            "subtitle": "Choose your workspace, I'll remember your preference",
+            "todoDesc": "Track tasks, complete them one by one",
+            "focusDesc": "Pomodoro timer, deep focus"
+        },
+        "isDefaultView": "Already default view",
+        "unpin": "Unpin panel",
+        "pin": "Pin panel",
+        "skipToNext": "Skip to next",
+        "inProgress": "In progress",
+        "dragToReorder": "Drag to reorder",
+        "setDueDate": "Set due date",
+        "currentTask": "Current task",
+        "moreItems": "{{count}} more",
+        "deleted": "Deleted",
+        "undo": "Undo",
+        "due": {
+            "overdue": "{{days}}d overdue",
+            "today": "Today",
+            "tomorrow": "Tomorrow",
+            "daysLater": "In {{days}}d",
+            "date": "{{month}}/{{day}}"
+        },
+        "cal": {
+            "mon": "Mo",
+            "tue": "Tu",
+            "wed": "We",
+            "thu": "Th",
+            "fri": "Fr",
+            "sat": "Sa",
+            "sun": "Su",
+            "monthLabel": "{{year}}/{{month}}",
+            "today": "Today",
+            "tomorrow": "Tomorrow",
+            "weekend": "Weekend",
+            "clear": "Clear"
+        }
+    },
     "ganyu": {
         "greet": {
             "dawn": {
@@ -219,6 +263,9 @@
         "footer": {
             "pomodoros": "Focused today",
             "minutes": "minutes"
+        },
+        "ai": {
+            "keyStorageWarning": "Your API key is stored in plain text in the local settings file (settings.json). Do not use keys with broad permissions."
         }
     }
 }

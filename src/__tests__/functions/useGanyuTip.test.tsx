@@ -16,6 +16,7 @@ import {
     DEFAULT_GANYU_SETTINGS,
 } from "../../hooks/useGanyuSettings";
 import { CopyScene } from "../../ui/office_popover/ganyuCopy";
+import { resetTipCache } from "../../hooks/useGanyuTip";
 
 /**
  * useGanyuTip 降级 / 时序属性测试(Task 12)。
@@ -122,6 +123,7 @@ function deferred<T>() {
 beforeEach(() => {
     mockGenerateTip.mockReset();
     enableStore();
+    resetTipCache();
 });
 
 afterEach(() => {
@@ -187,6 +189,7 @@ describe("useGanyuTip · Property 10: 加载先静态、成功后更新", () => 
                 ctxArb,
                 async (fallback, aiTip, ctx) => {
                     mockGenerateTip.mockReset();
+                    resetTipCache();
                     // 用 deferred 控制成功时机,确保「初始即 fallback」可被观测。
                     const d = deferred<TipResult>();
                     mockGenerateTip.mockReturnValue(d.promise);
@@ -222,6 +225,7 @@ describe("useGanyuTip · Property 12: 关闭面板后放弃未完成请求", () 
                 ctxArb,
                 async (fallback, lateTip, ctx) => {
                     mockGenerateTip.mockReset();
+                    resetTipCache();
                     const d = deferred<TipResult>();
                     mockGenerateTip.mockReturnValue(d.promise);
 
@@ -258,6 +262,7 @@ describe("useGanyuTip · Property 13: 同一上下文去重", () => {
                 fc.integer({ min: 2, max: 8 }),
                 async (fallback, ctx, n) => {
                     mockGenerateTip.mockReset();
+                    resetTipCache();
                     mockGenerateTip.mockResolvedValue({ ok: true, tip: "你辛苦了。" });
 
                     const { result, rerender, unmount } = renderHook(
@@ -274,12 +279,10 @@ describe("useGanyuTip · Property 13: 同一上下文去重", () => {
                     );
                     expect(mockGenerateTip).toHaveBeenCalledTimes(1);
 
-                    // 指纹变化(新 nowISO 模拟重新打开/阶段切换)→ 触发新的请求。
+                    // 指纹变化(phase 变化模拟阶段切换)→ 触发新的请求。
                     const ctx2: TipContext = {
                         ...ctx,
-                        nowISO: new Date(
-                            new Date(ctx.nowISO).getTime() + 60000
-                        ).toISOString(),
+                        phase: ctx.phase === "idle" ? "working" : "idle",
                     };
                     rerender(makeArgs({ enabled: true, fallback, ctx: ctx2 }));
                     await waitFor(() =>
@@ -322,22 +325,27 @@ describe("useGanyuTip · 示例:打开面板 / 阶段切换各触发一次请求
         unmount();
     });
 
-    it("重新打开(新 nowISO)触发一次新请求", async () => {
+    it("重新打开(跨越 TTL 窗口)触发一次新请求", async () => {
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date("2024-01-01T14:00:00.000Z"));
         mockGenerateTip.mockResolvedValue({ ok: true, tip: "下午好。" });
         const fallback = "下午好,我替你沏了杯清心茶。";
 
-        const { rerender, unmount } = renderHook((props) => useGanyuTip(props), {
+        const { result, unmount } = renderHook((props) => useGanyuTip(props), {
             initialProps: makeArgs({ enabled: true, fallback, ctx: baseCtx }),
         });
         await waitFor(() => expect(mockGenerateTip).toHaveBeenCalledTimes(1));
-
-        const reopened: TipContext = {
-            ...baseCtx,
-            nowISO: "2024-01-01T14:05:00.000Z",
-        };
-        rerender(makeArgs({ enabled: true, fallback, ctx: reopened }));
-        await waitFor(() => expect(mockGenerateTip).toHaveBeenCalledTimes(2));
         unmount();
+
+        // 推进到下一个 TTL 窗口(>3min)→ 指纹中 nowWindow 变化 → 新请求
+        vi.setSystemTime(new Date("2024-01-01T14:04:00.000Z"));
+
+        const { unmount: unmount2 } = renderHook((props) => useGanyuTip(props), {
+            initialProps: makeArgs({ enabled: true, fallback, ctx: baseCtx }),
+        });
+        await waitFor(() => expect(mockGenerateTip).toHaveBeenCalledTimes(2));
+        unmount2();
+        vi.useRealTimers();
     });
 
     it("阶段切换(phase 变化)触发一次新请求", async () => {

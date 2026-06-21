@@ -11,6 +11,7 @@ import { FocusPhase } from "../../types/IOffice";
 import { emitUpdatePetsEvent } from "../../utils/event";
 import { DispatchType } from "../../types/IEvents";
 import { getTimeSegment, resolveCopy, CopyScene } from "./ganyuCopy";
+import { localDateStr } from "../../utils/date";
 import MiniCalendar from "./MiniCalendar";
 import styles from "./OfficePopover.module.css";
 
@@ -26,30 +27,22 @@ function fmt(sec: number): string {
     return `${m < 10 ? "0" : ""}${m}:${r < 10 ? "0" : ""}${r}`;
 }
 
-/** 本地今天的 YYYY-MM-DD(不受时区 toISOString 偏移影响)。 */
-function localToday(): string {
-    const d = new Date();
-    const m = `${d.getMonth() + 1}`.padStart(2, "0");
-    const day = `${d.getDate()}`.padStart(2, "0");
-    return `${d.getFullYear()}-${m}-${day}`;
-}
-
 /** 计算 dueDate 距今天的天数差(正=未来,负=逾期,0=今天)。 */
-function dueDiffDays(dueDate: string): number {
-    const today = new Date(localToday() + "T00:00:00");
+export function dueDiffDays(dueDate: string): number {
+    const today = new Date(localDateStr() + "T00:00:00");
     const due = new Date(dueDate + "T00:00:00");
     return Math.round((due.getTime() - today.getTime()) / 86400000);
 }
 
-/** 截止日期的友好标签 + 紧急程度(用于配色)。 */
-function dueLabel(dueDate: string): { text: string; level: "overdue" | "today" | "soon" | "later" } {
+/** 截止日期的 i18n key + 插值参数 + 紧急程度(用于配色)。 */
+export function dueLabelInfo(dueDate: string): { key: string; params: Record<string, number>; level: "overdue" | "today" | "soon" | "later" } {
     const diff = dueDiffDays(dueDate);
-    if (diff < 0) return { text: `逾期${-diff}天`, level: "overdue" };
-    if (diff === 0) return { text: "今天", level: "today" };
-    if (diff === 1) return { text: "明天", level: "soon" };
-    if (diff <= 3) return { text: `${diff}天后`, level: "soon" };
+    if (diff < 0) return { key: "office.due.overdue", params: { days: -diff }, level: "overdue" };
+    if (diff === 0) return { key: "office.due.today", params: {}, level: "today" };
+    if (diff === 1) return { key: "office.due.tomorrow", params: {}, level: "soon" };
+    if (diff <= 3) return { key: "office.due.daysLater", params: { days: diff }, level: "soon" };
     const d = new Date(dueDate + "T00:00:00");
-    return { text: `${d.getMonth() + 1}月${d.getDate()}日`, level: "later" };
+    return { key: "office.due.date", params: { month: d.getMonth() + 1, day: d.getDate() }, level: "later" };
 }
 
 function phaseTotal(phase: FocusPhase, c: { workDuration: number; shortBreakDuration: number; longBreakDuration: number }): number {
@@ -98,12 +91,27 @@ function CryoBurst({ trigger }: { trigger: number }) {
 export default function OfficePopover() {
     const { t } = useTranslation();
     const { config, phase, remaining, isPaused, stats, completedPomodoros, start, pause, resume, reset, skip, loadConfig } = useFocusStore();
-    const { todos, addTodo, toggleTodo, removeTodo, setCurrent, clearCompleted, loadTodos, reorderTodos, setDueDate } = useTodoStore();
+    const { todos, addTodo, toggleTodo, removeTodo, setCurrent, clearCompleted, loadTodos, reorderTodos, setDueDate, editTodo, lastDeleted, undoDelete, dismissUndo } = useTodoStore();
     const aiEnabled = useGanyuSettings((s) => s.aiEnabled);
     const loadGanyuSettings = useGanyuSettings((s) => s.loadSettings);
     const [text, setText] = useState("");
     const [leaving, setLeaving] = useState(false);
     const [showKey, setShowKey] = useState(0);
+
+    // #3 — Pin: panel stays visible when pinned (persisted in localStorage)
+    const [pinned, setPinned] = useState(() => localStorage.getItem("office_pinned") === "1");
+    // Interaction guard: while any interaction is active, skip auto-hide
+    const interactionRef = useRef(new Set<string>());
+
+    // #5 — Undo toast: auto-dismiss after 5s
+    const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    useEffect(() => {
+        if (lastDeleted) {
+            if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+            undoTimerRef.current = setTimeout(() => dismissUndo(), 5000);
+        }
+        return () => { if (undoTimerRef.current) clearTimeout(undoTimerRef.current); };
+    }, [lastDeleted, dismissUndo]);
 
     // view system: first run shows the chooser; afterwards open the saved default
     const savedDefault = (localStorage.getItem(DEFAULT_VIEW_KEY) as View | null);
@@ -119,6 +127,8 @@ export default function OfficePopover() {
         const p = appWindow.onFocusChanged(({ payload: focused }) => {
             if (!focused) {
                 if (Date.now() - mountedAt < 400) return;
+                // #3 guard: skip hide if pinned or any interaction is active
+                if (pinned || interactionRef.current.size > 0) return;
                 emitUpdatePetsEvent({ dispatchType: DispatchType.PetInteractionEnd });
                 setLeaving(true);
                 setTimeout(() => {
@@ -137,14 +147,14 @@ export default function OfficePopover() {
         });
         return () => { p.then((un) => un()); };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [pinned]);
 
     const total = phaseTotal(phase, config);
     const offset = total > 0 ? RING * (1 - Math.max(0, Math.min(1, remaining / total))) : 0;
     const running = phase !== "idle" && !isPaused;
 
     const phaseLabel = (phase !== "idle" && isPaused)
-        ? t("已暂停")
+        ? t("office.paused")
         : resolveCopy({ kind: "phaseLabel", phase }, t, showKey);
 
     const greet = useMemo(() => {
@@ -220,6 +230,36 @@ export default function OfficePopover() {
     const [burstId, setBurstId] = useState<string | null>(null);
     // 当前打开日历浮层的待办项 id
     const [calOpenId, setCalOpenId] = useState<string | null>(null);
+
+    // #4 — Inline editing state
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [editText, setEditText] = useState("");
+
+    const startEdit = useCallback((id: string, text: string) => {
+        setEditingId(id);
+        setEditText(text);
+        interactionRef.current.add("editing");
+    }, []);
+
+    const commitEdit = useCallback(() => {
+        if (editingId) {
+            const trimmed = editText.trim();
+            if (trimmed) editTodo(editingId, trimmed);
+            interactionRef.current.delete("editing");
+            setEditingId(null);
+        }
+    }, [editingId, editText, editTodo]);
+
+    const cancelEdit = useCallback(() => {
+        interactionRef.current.delete("editing");
+        setEditingId(null);
+    }, []);
+
+    // #3 guard: sync calendar open state into interactionRef
+    useEffect(() => {
+        if (calOpenId) interactionRef.current.add("calendar");
+        else interactionRef.current.delete("calendar");
+    }, [calOpenId]);
     const onToggle = useCallback((id: string) => {
         const todo = todos.find((x) => x.id === id);
         const willComplete = todo ? !todo.completed : false;
@@ -309,6 +349,7 @@ export default function OfficePopover() {
                 dragIdRef.current = id;
                 setDragId(id);
                 setOverId(id);
+                interactionRef.current.add("dragging");
             }
             const targetId = findTodoIdAtY(ev.clientY);
             if (targetId) setOverId(targetId);
@@ -327,6 +368,7 @@ export default function OfficePopover() {
                 const from = dragIdRef.current;
                 const to = findTodoIdAtY(ev.clientY);
                 if (from && to && from !== to) reorderTodos(from, to);
+                interactionRef.current.delete("dragging");
             }
             dragIdRef.current = null;
             setDragId(null);
@@ -352,6 +394,11 @@ export default function OfficePopover() {
     const chooseView = (v: View) => { localStorage.setItem(DEFAULT_VIEW_KEY, v); setView(v); setOnboarding(false); };
     const setAsDefault = () => { localStorage.setItem(DEFAULT_VIEW_KEY, view); setShowKey((k) => k + 1); };
     const isDefault = savedDefault === view;
+    const togglePin = () => {
+        const next = !pinned;
+        setPinned(next);
+        localStorage.setItem("office_pinned", next ? "1" : "0");
+    };
 
     // ---- onboarding (first run) ----
     if (onboarding) {
@@ -361,18 +408,18 @@ export default function OfficePopover() {
                 <div className={styles.onboard}>
                     <div className={styles.onboardHead}>
                         <span className={styles.greetK}>{resolveCopy({ kind: "onboardGreet" }, t, showKey)}</span>
-                        <span className={styles.greetS}>{t("选择常用的工作台，我会记住你的偏好")}</span>
+                        <span className={styles.greetS}>{t("office.onboard.subtitle")}</span>
                     </div>
                     <div className={styles.cards}>
                         <button className={styles.card} onClick={() => chooseView("todo")}>
                             <span className={styles.cardIcon}><ListIcon /></span>
-                            <span className={styles.cardTitle}>{t("待办清单")}</span>
-                            <span className={styles.cardDesc}>{t("记录任务，逐项完成")}</span>
+                            <span className={styles.cardTitle}>{t("office.tab.todo")}</span>
+                            <span className={styles.cardDesc}>{t("office.onboard.todoDesc")}</span>
                         </button>
                         <button className={styles.card} onClick={() => chooseView("focus")}>
                             <span className={styles.cardIcon}><TimerIcon /></span>
-                            <span className={styles.cardTitle}>{t("专注计时")}</span>
-                            <span className={styles.cardDesc}>{t("番茄钟，沉浸投入")}</span>
+                            <span className={styles.cardTitle}>{t("office.tab.focus")}</span>
+                            <span className={styles.cardDesc}>{t("office.onboard.focusDesc")}</span>
                         </button>
                     </div>
                     <div className={styles.onboardHint}>{resolveCopy({ kind: "onboardHint" }, t, showKey)}</div>
@@ -403,18 +450,25 @@ export default function OfficePopover() {
                 <div className={styles.tabTrack}>
                     <span className={`${styles.tabGlider} ${view === "focus" ? styles.gliderRight : ""}`} />
                     <button className={`${styles.tab} ${view === "todo" ? styles.tabOn : ""}`} onClick={() => setView("todo")}>
-                        {t("待办")}{pendingCount > 0 && <span className={styles.tabBadge}>{pendingCount}</span>}
+                        {t("office.tab.todo")}{pendingCount > 0 && <span className={styles.tabBadge}>{pendingCount}</span>}
                     </button>
                     <button className={`${styles.tab} ${view === "focus" ? styles.tabOn : ""}`} onClick={() => setView("focus")}>
-                        {t("专注")}
+                        {t("office.tab.focus")}
                     </button>
                 </div>
                 <button
                     className={`${styles.pin} ${isDefault ? styles.pinOn : ""}`}
                     onClick={setAsDefault}
-                    title={isDefault ? t("已是默认视图") : resolveCopy({ kind: "btn", action: "setDefault" }, t, showKey)}
+                    title={isDefault ? t("office.isDefaultView") : resolveCopy({ kind: "btn", action: "setDefault" }, t, showKey)}
                 >
                     <PinIcon on={isDefault} />
+                </button>
+                <button
+                    className={`${styles.pin} ${pinned ? styles.pinOn : ""}`}
+                    onClick={togglePin}
+                    title={pinned ? t("office.unpin") : t("office.pin")}
+                >
+                    📌
                 </button>
             </div>
 
@@ -476,13 +530,13 @@ export default function OfficePopover() {
                                 {running ? <PauseIcon /> : <PlayIcon />}
                             </button>
                             {phase !== "idle" && (
-                                <button className={`${styles.ctrl} ${styles.ghost}`} onClick={skip} title={t("跳到下一段")}>
+                                <button className={`${styles.ctrl} ${styles.ghost}`} onClick={skip} title={t("office.skipToNext")}>
                                     <SkipIcon />
                                 </button>
                             )}
                         </div>
                         {current && (
-                            <div className={styles.focusTask}>{t("正在进行")} · {current.text}</div>
+                            <div className={styles.focusTask}>{t("office.inProgress")} · {current.text}</div>
                         )}
                     </section>
                 </div>
@@ -495,6 +549,8 @@ export default function OfficePopover() {
                             value={text}
                             onChange={(e) => setText(e.currentTarget.value)}
                             onKeyDown={(e) => { if (e.key === "Enter") onAdd(); }}
+                            onFocus={() => interactionRef.current.add("addInput")}
+                            onBlur={() => interactionRef.current.delete("addInput")}
                         />
                         <button className={styles.addBtn} onClick={onAdd} disabled={!text.trim()}><PlusIcon /></button>
                     </div>
@@ -516,7 +572,7 @@ export default function OfficePopover() {
                                         className={`${styles.item} ${styles.draggableRow} ${todo.isCurrent && !todo.completed ? styles.itemCurrent : ""} ${dragId === todo.id ? styles.dragging : ""} ${overId === todo.id && dragId !== todo.id ? styles.dragOver : ""}`}
                                         onPointerDown={onRowPointerDown(todo.id)}
                                     >
-                                        <span className={styles.dragHandle} title={t("拖动可调整顺序")}>⠿</span>
+                                        <span className={styles.dragHandle} title={t("office.dragToReorder")}>⠿</span>
                                         <span
                                             className={`${styles.check} ${todo.completed ? styles.checkDone : ""}`}
                                             onClick={() => onToggle(todo.id)}
@@ -535,12 +591,26 @@ export default function OfficePopover() {
                                                 </span>
                                             )}
                                         </span>
-                                        <span className={`${styles.txt} ${todo.completed ? styles.txtDone : ""}`}>{todo.text}</span>
+                                        <span className={`${styles.txt} ${todo.completed ? styles.txtDone : ""}`}
+                                            onDoubleClick={() => { if (!todo.completed) startEdit(todo.id, todo.text); }}
+                                        >
+                                            {editingId === todo.id ? (
+                                                <input
+                                                    className={styles.editInput}
+                                                    value={editText}
+                                                    onChange={(e) => setEditText(e.currentTarget.value)}
+                                                    onKeyDown={(e) => { if (e.key === "Enter") commitEdit(); else if (e.key === "Escape") cancelEdit(); }}
+                                                    onBlur={commitEdit}
+                                                    autoFocus
+                                                    onPointerDown={(e) => e.stopPropagation()}
+                                                />
+                                            ) : todo.text}
+                                        </span>
                                         {todo.dueDate && !todo.completed && (() => {
-                                            const dl = dueLabel(todo.dueDate);
+                                            const dl = dueLabelInfo(todo.dueDate);
                                             return (
                                                 <span className={`${styles.dueBadge} ${styles[`due_${dl.level}`] ?? ""}`}>
-                                                    {dl.text}
+                                                    {t(dl.key, dl.params)}
                                                 </span>
                                             );
                                         })()}
@@ -548,7 +618,7 @@ export default function OfficePopover() {
                                             <div className={styles.dueWrap} onPointerDown={(e) => e.stopPropagation()}>
                                                 <button
                                                     className={`${styles.dueBtn} ${todo.dueDate ? styles.dueBtnSet : ""}`}
-                                                    title={t("设置截止日期")}
+                                                    title={t("office.setDueDate")}
                                                     data-cal-trigger
                                                     onClick={() => setCalOpenId((cur) => (cur === todo.id ? null : todo.id))}
                                                 >
@@ -567,7 +637,7 @@ export default function OfficePopover() {
                                             <button
                                                 className={`${styles.star} ${todo.isCurrent ? styles.starOn : ""}`}
                                                 onClick={() => setCurrent(todo.id)}
-                                                title={todo.isCurrent ? t("当前任务") : resolveCopy({ kind: "btn", action: "setCurrent" }, t, showKey)}
+                                                title={todo.isCurrent ? t("office.currentTask") : resolveCopy({ kind: "btn", action: "setCurrent" }, t, showKey)}
                                             >{todo.isCurrent ? "★" : "☆"}</button>
                                         )}
                                         <button className={styles.star} onClick={() => removeTodo(todo.id)} title={resolveCopy({ kind: "btn", action: "delete" }, t, showKey)}>✕</button>
@@ -576,11 +646,19 @@ export default function OfficePopover() {
                             </ul>
                             {!atBottom && hiddenBelow > 0 && (
                                 <div className={styles.moreHint} onClick={scrollListDown}>
-                                    {t("还有")} {hiddenBelow} {t("项")} ↓
+                                    {t("office.moreItems", { count: hiddenBelow })} ↓
                                 </div>
                             )}
                         </div>
                     )}
+                </div>
+            )}
+
+            {lastDeleted && (
+                <div className={styles.undoToast}>
+                    <span>{t("office.deleted")}</span>
+                    <span className={styles.undoSep}>·</span>
+                    <button className={styles.undoBtn} onClick={undoDelete}>{t("office.undo")}</button>
                 </div>
             )}
 

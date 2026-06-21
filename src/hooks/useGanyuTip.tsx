@@ -4,6 +4,15 @@ import { GanyuSettings } from "./useGanyuSettings";
 import { useGanyuSettings } from "./useGanyuSettings";
 import { generateTip, TipContext } from "../services/tipService";
 
+// ---- TTL 缓存 ----
+export const TTL_MS = 3 * 60 * 1000; // 3 分钟
+
+interface CacheEntry { fingerprint: string; tip: string; ts: number; }
+let tipCache: CacheEntry | null = null;
+
+/** 供测试重置缓存状态。 */
+export function resetTipCache() { tipCache = null; }
+
 /**
  * `useGanyuTip` —— AI 个性化话术钩子(可选增强层)。
  *
@@ -75,16 +84,16 @@ export function useGanyuTip(args: {
     // AI 路径的「有效启用」需同时满足:调用方启用 + 设置中已开启。
     const effectiveEnabled = enabled && aiEnabled;
 
-    // 去重指纹:场景 + 关键上下文字段。`nowISO` 由调用方按「每次打开稳定」提供,
-    // 因此同一次打开内重复渲染指纹不变(去重,需求 10.4),阶段切换 / 重新打开则变化
-    // (重新请求,需求 9.1/9.2)。`enabled` 变化也会改变指纹。
+    // 去重指纹:场景 + 关键上下文字段。时间按 TTL 窗口量化,
+    // 同一窗口内多次打开面板 → 指纹相同 → effect 不重新执行(不重发请求)。
+    // 阶段切换 / 超过 TTL 窗口则指纹变化 → 重新请求。
     let fingerprint = "disabled";
     if (effectiveEnabled) {
         const ctx = buildContext();
         fingerprint = JSON.stringify({
             scene,
             segment: ctx.segment,
-            nowISO: ctx.nowISO,
+            nowWindow: Math.floor(Date.now() / TTL_MS),
             phase: ctx.phase,
             todayPomodoros: ctx.todayPomodoros,
             todayFocusSeconds: ctx.todayFocusSeconds,
@@ -102,6 +111,13 @@ export function useGanyuTip(args: {
             return;
         }
 
+        // 缓存命中:同一指纹在 TTL 内复用上次 AI 结果,不发请求。
+        if (tipCache && tipCache.fingerprint === fingerprint && Date.now() - tipCache.ts < TTL_MS) {
+            setText(tipCache.tip);
+            setLoading(false);
+            return;
+        }
+
         // 新一轮请求:先展示静态文案(需求 9.5),再异步覆盖。
         setText(fallback);
         setLoading(true);
@@ -116,8 +132,10 @@ export function useGanyuTip(args: {
                 settled = true;
                 if (result.ok && result.tip && result.tip.trim().length > 0) {
                     setText(result.tip);
+                    // 成功时写入缓存。
+                    tipCache = { fingerprint, tip: result.tip, ts: Date.now() };
                 } else {
-                    // 任意失败 → 保持静态兜底(需求 9.3/9.4)。
+                    // 任意失败 → 保持静态兜底(需求 9.3/9.4)。不写缓存。
                     setText(fallback);
                 }
                 setLoading(false);

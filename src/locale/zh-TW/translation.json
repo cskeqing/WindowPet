@@ -116,6 +116,50 @@
   "Add your first task and start focusing with your pet!": "新增你的第一個任務，和寵物一起專注吧！",
   "Delete task?": "刪除任務？",
   "Delete": "刪除",
+  "office": {
+    "paused": "已暫停",
+    "tab": {
+      "todo": "待辦清單",
+      "focus": "專注計時"
+    },
+    "onboard": {
+      "subtitle": "選擇常用的工作台，我會記住你的偏好",
+      "todoDesc": "記錄任務，逐項完成",
+      "focusDesc": "番茄鐘，沉浸投入"
+    },
+    "isDefaultView": "已是預設檢視",
+    "unpin": "取消固定",
+    "pin": "固定面板",
+    "skipToNext": "跳到下一段",
+    "inProgress": "正在進行",
+    "dragToReorder": "拖動可調整順序",
+    "setDueDate": "設定截止日期",
+    "currentTask": "當前任務",
+    "moreItems": "還有 {{count}} 項",
+    "deleted": "已刪除",
+    "undo": "復原",
+    "due": {
+      "overdue": "逾期{{days}}天",
+      "today": "今天",
+      "tomorrow": "明天",
+      "daysLater": "{{days}}天後",
+      "date": "{{month}}月{{day}}日"
+    },
+    "cal": {
+      "mon": "一",
+      "tue": "二",
+      "wed": "三",
+      "thu": "四",
+      "fri": "五",
+      "sat": "六",
+      "sun": "日",
+      "monthLabel": "{{year}}年{{month}}月",
+      "today": "今天",
+      "tomorrow": "明天",
+      "weekend": "週末",
+      "clear": "清除"
+    }
+  },
   "ganyu": {
     "greet": {
       "dawn": {
@@ -220,6 +264,9 @@
     "footer": {
       "pomodoros": "今日專注",
       "minutes": "分鐘"
+    },
+    "ai": {
+      "keyStorageWarning": "你的 API Key 以明文儲存在本機 settings.json 中，請勿使用權限過大的金鑰。"
     }
   }
 }
